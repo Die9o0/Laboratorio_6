@@ -27,14 +27,16 @@ int main(void)
 	cli();
 	initUART();
 	initADC();
-	writeString("Seleccionar opción: 1:Leer potenciómetro. 2:enviar ASCII.");
+	DDRD	|= (1<<DDD1) | (1<<DDD4) | (1<<DDD5) | (1<<DDD6) | (1<<DDD7);
+	DDRB	= 0xFF;
 	DDRC	= 0x00;
-	ADCSRA		|= (1<<ADSC);
+	writeString("Seleccionar opción: 1:Leer potenciómetro. 2:enviar ASCII.");
+	ADCSRA		|= (1<<ADSC); //Lectura ADC
 	sei();
 	while (1)
 	{
-		PORTB = NIBBLE_H;
-		PORTD = (PORTD & 0x0F) | (NIBBLE_L << 4);
+		PORTB = NIBBLE_H;	//Muestra parte del número en PORTB
+		PORTD = (PORTD & 0x0F) | (NIBBLE_L << 4);	//Muestra parte del número en PORTD
 	}
 }
 /****************************************/
@@ -63,12 +65,12 @@ ISR(USART_RX_vect)
 	} 
 	else
 	{
-		if (ValorRX == 49)
+		if (ValorRX == 49)		//Valor es 1 
 		{
-			itoa(POT, buffer, 10);
-			writeString(buffer);
+			itoa(POT, buffer, 10);	//Convierte el valor a un número
+			writeString(buffer);	//Muestra
 			writeString("Seleccionar opción: 1:Leer potenciómetro. 2:enviar ASCII.");
-		} else if (ValorRX == 50)
+		} else if (ValorRX == 50) //Valor es 2
 		{
 			writeString("Ingrese su caracter");
 			ASCII = 1;
@@ -80,6 +82,6 @@ ISR(USART_RX_vect)
 }
 ISR(ADC_vect)
 {
-	POT = ADCH;
+	POT = ADCH;	//Guarda valor
 	ADCSRA		|= (1<<ADSC);		//Inicia lectura ADC
 }
